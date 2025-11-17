@@ -6,82 +6,55 @@
   <title>WWCC Manual Check • Baby Bloom Sydney</title>
   <style>
     :root {--primary:#4f46e5;--bg:#f8fafc;--text:#1e293b;--border:#e2e8f0;--hover:#eef2ff;--accent:#10b981;--green:#059669;}
-    body {margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;}
-    .main {display:flex;height:100vh;position:relative;}
-    .table-section {width:33%;overflow-y:auto;padding:1rem;border-right:1px solid var(--border);background:white;display:flex;flex-direction:column;}
-    .portal-section {width:67%;padding:2rem;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#f8fafc;position:relative;}
-    .portal-trigger {background:var(--accent);color:white;padding:1rem 2rem;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:background .2s;}
-    .portal-trigger:hover {background:#059669;}
-    .portal-tip {text-align:center;margin-top:1rem;color:#64748b;font-size:0.9rem;}
-    header {background:var(--primary);color:white;padding:1rem;text-align:center;}
+    body {margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);padding:1rem;}
+    .container {max-width:900px;margin:0 auto;background:white;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,.1);overflow:hidden;}
+    header {background:var(--primary);color:white;padding:1.5rem;text-align:center;position:relative;}
     header h1 {margin:0;font-size:1.5rem;font-weight:600;}
-    .count-badge {display:inline-block;background:rgba(255,255,255,.2);padding:.25rem .75rem;border-radius:999px;font-size:.875rem;margin-top:.5rem;}
-    table {width:100%;border-collapse:collapse;font-size:.9375rem;flex:1;}
-    th {text-align:left;padding:.75rem .5rem;background:#f1f5f9;border-bottom:2px solid var(--border);font-weight:600;color:var(--text);}
-    td {padding:.75rem .5rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
+    .verify-btn {background:var(--accent);color:white;padding:.5rem 1rem;border-radius:999px;font-size:.875rem;font-weight:600;cursor:pointer;transition:background .2s;position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);}
+    .verify-btn:hover {background:#059669;}
+    .content {padding:1.5rem;}
+    .table-wrapper {max-height:70vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px;}
+    table {width:100%;border-collapse:collapse;font-size:.9375rem;}
+    thead {position:sticky;top:0;z-index:10;}
+    th {text-align:left;padding:.75rem 1rem;background:#f1f5f9;border-bottom:2px solid var(--border);font-weight:600;color:var(--text);}
+    td {padding:.75rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
     tr:hover td {background:var(--hover);}
-    .action-btn {background:var(--accent);color:white;padding:0.35rem 0.75rem;border-radius:6px;font-size:0.8rem;font-weight:500;cursor:pointer;transition:background .2s;margin-right:0.5rem;}
+    .action-btn {width:40px;height:40px;border-radius:50%;background:var(--accent);color:white;font-size:1.2rem;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;margin:0 auto;}
     .action-btn:hover {background:#059669;}
-    .copy-all-btn {background:var(--primary);}
-    .empty {text-align:center;padding:2rem;color:#64748b;font-style:italic;}
+    .action-btn.done {background:var(--green);}
+    .empty {text-align:center;padding:3rem;color:#64748b;font-style:italic;}
     tr.done td {background:#dcfce7 !important;}
-    .modal-overlay {display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);justify-content:center;align-items:center;z-index:1000;}
-    .modal-content {background:white;width:90%;max-width:1000px;height:90%;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.3);}
-    .modal-header {background:var(--primary);color:white;padding:1rem;text-align:center;font-weight:600;position:relative;}
-    .close {position:absolute;right:1rem;top:1rem;font-size:1.5rem;cursor:pointer;color:white;}
-    .modal-body {flex:1;}
-    .modal-body iframe {width:100%;height:100%;border:none;}
-    @media (max-width:1024px){
-      .main {flex-direction:column;}
-      .table-section {width:100%;height:50vh;}
-      .portal-section {width:100%;height:50vh;padding:1rem;}
+    @media (max-width:640px){
+      .verify-btn {position:static;transform:none;margin-top:1rem;display:inline-block;}
+      .table-wrapper {max-height:50vh;}
     }
   </style>
 </head>
 <body>
-  <div class="main">
-    <div class="table-section">
-      <header>
-        <h1>WWCC Manual Verification</h1>
-        <div class="count-badge" id="countBadge">Loading…</div>
-      </header>
-      <table id="wwccTable">
-        <thead>
-          <tr>
-            <th>Surname</th>
-            <th>DOB</th>
-            <th>WWCC</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-    <div class="portal-section" id="portalSection">
-      <div class="portal-trigger" onclick="openPortalModal()">
-        Open Portal in Modal
-      </div>
-      <div class="portal-tip">
-        💡 Click row buttons → Copy → Paste into portal. Click "Added" when done.
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Overlay (in right section) -->
-  <div id="portalModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span>NSW Employer WWCC Portal</span>
-        <span class="close" onclick="closePortalModal()">×</span>
-      </div>
-      <div class="modal-body">
-        <iframe src="https://wwccemployer.ocg.nsw.gov.au/VerifyEmployee"></iframe>
+  <div class="container">
+    <header>
+      <h1>WWCC Manual Verification</h1>
+      <div class="verify-btn" id="verifyBtn">Verify 0 WWCC's</div>
+    </header>
+    <div class="content">
+      <div class="table-wrapper">
+        <table id="wwccTable">
+          <thead>
+            <tr>
+              <th>Surname</th>
+              <th>Date of Birth</th>
+              <th>WWCC Number</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
       </div>
     </div>
   </div>
 
   <script>
-    // Decode packet
+    // ---- Decode packet ----
     const params = new URLSearchParams(location.search);
     const encoded = params.get('data') || '';
     let packet;
@@ -89,8 +62,8 @@
       const decoded = atob(encoded);
       packet = JSON.parse(decoded);
     } catch (e) {
-      document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" class="empty">Invalid data.</td></tr>`;
-      document.getElementById('countBadge').textContent = 'Error';
+      document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" class="empty">Invalid or missing data.</td></tr>`;
+      document.getElementById('verifyBtn').textContent = 'Error';
       console.error(e);
       throw e;
     }
@@ -98,7 +71,15 @@
     const firstObj = Array.isArray(packet) ? packet[0] : packet;
     const items = (firstObj && firstObj.items) || [];
     const count = items.length;
-    document.getElementById('countBadge').textContent = count === 0 ? 'No WWCC\'s' : `${count} WWCC${count > 1 ? '\'s' : ''}`;
+
+    // Update Verify button
+    const verifyBtn = document.getElementById('verifyBtn');
+    verifyBtn.textContent = count === 0 ? 'No WWCC\'s' : `Verify ${count} WWCC${count > 1 ? '\'s' : ''}`;
+    verifyBtn.onclick = () => {
+      if (count > 0) {
+        window.open('https://wwccemployer.ocg.nsw.gov.au/VerifyEmployee', '_blank');
+      }
+    };
 
     const tbody = document.getElementById('tableBody');
     if (count === 0) {
@@ -125,53 +106,35 @@
         td3.onclick = () => copy(td3.textContent, td3);
         tr.appendChild(td3);
 
-        // Actions
+        // + / ✓ Button
         const td4 = document.createElement('td');
-        // Copy All
-        const copyAllBtn = document.createElement('div');
-        copyAllBtn.className = 'action-btn copy-all-btn';
-        copyAllBtn.textContent = 'Copy All';
-        copyAllBtn.onclick = (e) => {
-          e.stopPropagation();
-          const allText = `Surname: ${row['1'] || ''} | DOB: ${row['3'] || ''} | WWCC: ${row['7'] || ''}`;
-          copy(allText, copyAllBtn);
-        };
-        td4.appendChild(copyAllBtn);
-        // Added
-        const addedBtn = document.createElement('div');
-        addedBtn.className = 'action-btn';
-        addedBtn.textContent = 'Added';
-        addedBtn.onclick = (e) => {
+        const btn = document.createElement('div');
+        btn.className = 'action-btn';
+        btn.textContent = '+';
+        btn.onclick = (e) => {
           e.stopPropagation();
           tr.classList.toggle('done');
+          btn.textContent = tr.classList.contains('done') ? '✓' : '+';
         };
-        td4.appendChild(addedBtn);
+        td4.appendChild(btn);
         tr.appendChild(td4);
 
         tbody.appendChild(tr);
       });
     }
 
-    // Copy
+    // Copy function
     function copy(text, el) {
       navigator.clipboard.writeText(text).then(() => {
         const orig = el.textContent;
         el.textContent = 'Copied!';
         el.style.color = 'green';
         setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1000);
+      }).catch(err => {
+        console.error('Copy failed', err);
+        alert('Copy failed – select & copy manually.');
       });
     }
-
-    // Modal
-    function openPortalModal() {
-      document.getElementById('portalModal').style.display = 'flex';
-    }
-    function closePortalModal() {
-      document.getElementById('portalModal').style.display = 'none';
-    }
-    document.getElementById('portalModal').addEventListener('click', (e) => {
-      if (e.target.id === 'portalModal') closePortalModal();
-    });
   </script>
 </body>
 </html>
