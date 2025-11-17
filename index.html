@@ -27,8 +27,8 @@
     th:nth-child(1), td:nth-child(1) {width:30%;}
     th:nth-child(2), td:nth-child(2) {width:25%;}
     th:nth-child(3), td:nth-child(3) {width:30%;}
-    th:nth-child(4), td:nth-child(4) {width:15%;text-align:right;}
-    td:nth-child(4) {display:flex;justify-content:flex-end;padding-right:1rem;}
+    th:nth-child(4), td:nth-child(4) {width:15%;text-align:center;}
+    td:nth-child(4) {display:flex;justify-content:center;}
     @media (max-width:640px){
       .verify-btn {position:static;transform:none;margin-top:1rem;display:inline-block;}
       .table-wrapper {max-height:50vh;}
@@ -116,7 +116,7 @@
         td3.onclick = () => copy(td3.textContent, td3);
         tr.appendChild(td3);
 
-        // + / ✓ Button (far right)
+        // + / ✓ Button (centered under Status)
         const td4 = document.createElement('td');
         const btn = document.createElement('div');
         btn.className = 'action-btn';
