@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WWCC Manual Check • Baby Bloom</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --border: #e2e8f0;
+      --hover: #eef2ff;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .count-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+    .content {
+      padding: 1.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.9375rem;
+    }
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: #f1f5f9;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600;
+      color: var(--text);
+    }
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    tr:hover td {
+      background: var(--hover);
+    }
+    .copy-hint {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .empty {
+      text-align: center;
+      padding: 3rem;
+      color: #64748b;
+      font-style: italic;
+    }
+    @media (max-width: 640px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead tr { display: none; }
+      tr { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+      td {
+        padding: 0.5rem 1rem;
+        border: none;
+        position: relative;
+        padding-left: 50%;
+      }
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 1rem;
+        width: 45%;
+        font-weight: 600;
+        color: var(--primary);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>WWCC Manual Verification</h1>
+      <div class="count-badge" id="countBadge">Loading...</div>
+    </header>
+    <div class="content">
+      <table id="wwccTable">
+        <thead>
+          <tr>
+            <th>Surname</th>
+            <th>Date of Birth</th>
+            <th>WWCC Number</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Rows injected by JS -->
+        </tbody>
+      </table>
+      <p class="copy-hint">👆 Click any cell to copy</p>
+    </div>
+  </div>
+
+  <script>
+    // Decode URL param
+    const params = new URLSearchParams(location.search);
+    const encoded = params.get('data') || '';
+    
+    let data;
+    try {
+      const decoded = atob(encoded);
+      data = JSON.parse(decoded);
+    } catch (e) {
+      document.getElementById('tableBody').innerHTML = 
+        `<tr><td colspan="3" class="empty">Invalid or missing data. Please check the link.</td></tr>`;
+      document.getElementById('countBadge').textContent = 'Error';
+      console.error('Decode failed:', e);
+      throw e;
+    }
+
+    // Update count
+    const count = data.count || data.items?.length || 0;
+    document.getElementById('countBadge').textContent = 
+      count === 0 ? 'No pending checks' : `${count} pending check${count > 1 ? 's' : ''}`;
+
+    // Build table
+    const tbody = document.getElementById('tableBody');
+    if (!data.items || data.items.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" class="empty">No pending WWCC checks.</td></tr>`;
+    } else {
+      data.items.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        // Surname
+        const td1 = document.createElement('td');
+        td1.textContent = row['1'] || '';
+        td1.dataset.label = 'Surname:';
+        td1.onclick = () => copyToClipboard(td1.textContent, td1);
+        tr.appendChild(td1);
+        
+        // DOB
+        const td2 = document.createElement('td');
+        td2.textContent = row['3'] || '';
+        td2.dataset.label = 'DOB:';
+        td2.onclick = () => copyToClipboard(td2.textContent, td2);
+        tr.appendChild(td2);
+        
+        // WWCC
+        const td3 = document.createElement('td');
+        td3.textContent = row['7'] || '';
+        td3.dataset.label = 'WWCC:';
+        td3.onclick = () => copyToClipboard(td3.textContent, td3);
+        tr.appendChild(td3);
+        
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Copy function with feedback
+    function copyToClipboard(text, element) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = element.textContent;
+        element.textContent = 'Copied!';
+        element.style.color = 'green';
+        setTimeout(() => {
+          element.textContent = original;
+          element.style.color = '';
+        }, 1000);
+      }).catch(err => {
+        console.error('Copy failed', err);
+        alert('Copy failed – please select and copy manually.');
+      });
+    }
+  </script>
+</body>
+</html>
