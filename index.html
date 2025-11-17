@@ -13,8 +13,8 @@
     .verify-btn {background:var(--accent);color:white;padding:.5rem 1rem;border-radius:999px;font-size:.875rem;font-weight:600;cursor:pointer;transition:background .2s;position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);}
     .verify-btn:hover {background:#059669;}
     .content {padding:1.5rem;}
-    .table-wrapper {max-height:70vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px;overflow-x:auto;}
-    table {width:100%;min-width:500px;border-collapse:collapse;font-size:.9375rem;}
+    .table-wrapper {max-height:70vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px;}
+    table {width:100%;border-collapse:collapse;font-size:.9375rem;}
     thead {position:sticky;top:0;z-index:10;}
     th {text-align:left;padding:.75rem .5rem;background:#f1f5f9;border-bottom:2px solid var(--border);font-weight:600;color:var(--text);}
     td {padding:.75rem .5rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
@@ -22,14 +22,14 @@
     .action-btn {width:40px;height:40px;border-radius:50%;background:var(--accent);color:white;font-size:1.2rem;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;margin:0 auto;}
     .action-btn:hover {background:#059669;}
     .action-btn.done {background:var(--green);}
-    .empty {text-align:center;padding:3rem;color:#64748b;font-style:italic;}
+    .empty {text-align:center;padding:2rem;color:#64748b;font-style:italic;}
     tr.done td {background:#dcfce7 !important;}
     @media (max-width:640px){
       .verify-btn {position:static;transform:none;margin-top:1rem;display:inline-block;}
       .table-wrapper {max-height:50vh;}
-      table {font-size:.875rem;}
+      table {font-size:.75rem;}
       th, td {padding:.5rem .3rem;}
-      .action-btn {width:36px;height:36px;font-size:1rem;}
+      .action-btn {width:32px;height:32px;font-size:1rem;}
     }
   </style>
 </head>
@@ -97,7 +97,7 @@
         td1.onclick = () => copy(td1.textContent, td1);
         tr.appendChild(td1);
 
-        // DOB (format DD/MM/YYYY)
+        // DOB (YYYY-MM-DD → DD/MM/YYYY)
         const td2 = document.createElement('td');
         const rawDob = row['3'] || '';
         const formattedDob = rawDob ? rawDob.split('-').reverse().join('/') : '';
@@ -111,8 +111,8 @@
         td3.onclick = () => copy(td3.textContent, td3);
         tr.appendChild(td3);
 
-        // + / ✓ Button (centered)
-        const td otra = document.createElement('td');
+        // + / ✓ Button
+        const td4 = document.createElement('td');
         const btn = document.createElement('div');
         btn.className = 'action-btn';
         btn.textContent = '+';
