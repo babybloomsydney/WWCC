@@ -5,123 +5,122 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WWCC Manual Check • Baby Bloom Sydney</title>
   <style>
-    :root {
-      --primary: #4f46e5;
-      --bg: #f8fafc;
-      --text: #1e293b;
-      --border: #e2e8f0;
-      --hover: #eef2ff;
-    }
-    body {margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);padding:1rem;}
-    .container {max-width:900px;margin:0 auto;background:white;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,.1);overflow:hidden;}
-    header {background:var(--primary);color:white;padding:1.5rem;text-align:center;}
+    :root {--primary:#4f46e5;--bg:#f8fafc;--text:#1e293b;--border:#e2e8f0;--hover:#eef2ff;--accent:#10b981;--green:#059669;}
+    body {margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+    .main {display:flex;height:100vh;}
+    .table-section {width:33%;overflow-y:auto;padding:1rem;border-right:1px solid var(--border);background:white;}
+    .portal-section {width:67%;height:100%;}
+    .portal-section iframe {width:100%;height:100%;border:none;}
+    header {background:var(--primary);color:white;padding:1rem;text-align:center;}
     header h1 {margin:0;font-size:1.5rem;font-weight:600;}
     .count-badge {display:inline-block;background:rgba(255,255,255,.2);padding:.25rem .75rem;border-radius:999px;font-size:.875rem;margin-top:.5rem;}
-    .content {padding:1.5rem;}
-    table {width:100%;border-collapse:collapse;margin-top:1rem;font-size:.9375rem;}
-    th {text-align:left;padding:.75rem 1rem;background:#f1f5f9;border-bottom:2px solid var(--border);font-weight:600;color:var(--text);}
-    td {padding:.75rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
+    table {width:100%;border-collapse:collapse;font-size:.9375rem;}
+    th {text-align:left;padding:.75rem .5rem;background:#f1f5f9;border-bottom:2px solid var(--border);font-weight:600;color:var(--text);}
+    td {padding:.75rem .5rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
     tr:hover td {background:var(--hover);}
-    .copy-hint {font-size:.75rem;color:#64748b;text-align:center;margin-top:1rem;}
-    .empty {text-align:center;padding:3rem;color:#64748b;font-style:italic;}
-    @media (max-width:640px){
-      table,thead,tbody,th,td,tr{display:block;}
-      thead tr{display:none;}
-      tr{margin-bottom:1rem;border:1px solid var(--border);border-radius:8px;}
-      td{padding:.5rem 1rem;border:none;position:relative;padding-left:50%;}
-      td::before{content:attr(data-label);position:absolute;left:1rem;width:45%;font-weight:600;color:var(--primary);}
+    .action-btn {background:var(--accent);color:white;padding:0.35rem 0.75rem;border-radius:6px;font-size:0.8rem;font-weight:500;cursor:pointer;transition:background .2s;}
+    .action-btn:hover {background:#059669;}
+    .empty {text-align:center;padding:2rem;color:#64748b;font-style:italic;}
+    tr.done td {background:#dcfce7 !important;}
+    @media (max-width:1024px){
+      .main {flex-direction:column;}
+      .table-section {width:100%;height:50vh;}
+      .portal-section {width:100%;height:50vh;}
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>WWCC Manual Verification</h1>
-      <div class="count-badge" id="countBadge">Loading…</div>
-    </header>
-    <div class="content">
+  <div class="main">
+    <div class="table-section">
+      <header>
+        <h1>WWCC Manual Verification</h1>
+        <div class="count-badge" id="countBadge">Loading…</div>
+      </header>
       <table id="wwccTable">
         <thead>
           <tr>
             <th>Surname</th>
-            <th>Date of Birth</th>
-            <th>WWCC Number</th>
+            <th>DOB</th>
+            <th>WWCC</th>
+            <th>Status</th>
           </tr>
         </thead>
-        <tbody id="tableBody"><!-- JS fills --></tbody>
+        <tbody id="tableBody"></tbody>
       </table>
-      <p class="copy-hint">👆 Click any cell to copy</p>
+    </div>
+    <div class="portal-section">
+      <iframe src="https://wwccemployer.ocg.nsw.gov.au/VerifyEmployee"></iframe>
     </div>
   </div>
 
   <script>
-    // ---- 1. Get & decode the ?data= param ----
+    // ---- Decode packet ----
     const params = new URLSearchParams(location.search);
     const encoded = params.get('data') || '';
-
     let packet;
     try {
       const decoded = atob(encoded);
-      packet = JSON.parse(decoded);  // Expected: [ { count: N, items: [ ... ] } ]
+      packet = JSON.parse(decoded);
     } catch (e) {
-      document.getElementById('tableBody').innerHTML =
-        `<tr><td colspan="3" class="empty">Invalid or missing data. Check the link.</td></tr>`;
+      document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" class="empty">Invalid data.</td></tr>`;
       document.getElementById('countBadge').textContent = 'Error';
-      console.error('Decode error:', e);
+      console.error(e);
       throw e;
     }
 
-    // ---- 2. Extract items array from the first object in the array ----
     const firstObj = Array.isArray(packet) ? packet[0] : packet;
     const items = (firstObj && firstObj.items) || [];
     const count = items.length;
+    document.getElementById('countBadge').textContent = count === 0 ? 'No WWCC\'s' : `${count} WWCC${count > 1 ? '\'s' : ''}`;
 
-    document.getElementById('countBadge').textContent =
-      count === 0 ? 'No rows' : `${count} row${count > 1 ? 's' : ''}`;
-
-    // ---- 3. Render EVERY row in items (no filtering) ----
     const tbody = document.getElementById('tableBody');
     if (count === 0) {
-      tbody.innerHTML = `<tr><td colspan="3" class="empty">No data received.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4" class="empty">No data received.</td></tr>`;
     } else {
       items.forEach(row => {
         const tr = document.createElement('tr');
 
-        // Surname ("1")
+        // Surname
         const td1 = document.createElement('td');
         td1.textContent = row['1'] || '';
-        td1.dataset.label = 'Surname:';
         td1.onclick = () => copy(td1.textContent, td1);
         tr.appendChild(td1);
 
-        // DOB ("3")
+        // DOB
         const td2 = document.createElement('td');
         td2.textContent = row['3'] || '';
-        td2.dataset.label = 'DOB:';
         td2.onclick = () => copy(td2.textContent, td2);
         tr.appendChild(td2);
 
-        // WWCC ("7")
+        // WWCC
         const td3 = document.createElement('td');
         td3.textContent = row['7'] || '';
-        td3.dataset.label = 'WWCC:';
         td3.onclick = () => copy(td3.textContent, td3);
         tr.appendChild(td3);
+
+        // Added Button
+        const td4 = document.createElement('td');
+        const btn = document.createElement('div');
+        btn.className = 'action-btn';
+        btn.textContent = 'Added';
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          tr.classList.toggle('done');
+        };
+        td4.appendChild(btn);
+        tr.appendChild(td4);
 
         tbody.appendChild(tr);
       });
     }
 
-    // ---- 4. Click-to-copy with visual feedback ----
+    // Copy function
     function copy(text, el) {
       navigator.clipboard.writeText(text).then(() => {
         const orig = el.textContent;
         el.textContent = 'Copied!';
         el.style.color = 'green';
-        setTimeout(() => {
-          el.textContent = orig;
-          el.style.color = '';
-        }, 1000);
+        setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1000);
       }).catch(err => {
         console.error('Copy failed', err);
         alert('Copy failed – select & copy manually.');
