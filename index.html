@@ -61,8 +61,8 @@
 
     let data;
     try {
-      const decoded = atob(encoded);          // base64 → string
-      data = JSON.parse(decoded);             // string → JS object
+      const decoded = atob(encoded);
+      data = JSON.parse(decoded);
     } catch (e) {
       document.getElementById('tableBody').innerHTML =
         `<tr><td colspan="3" class="empty">Invalid or missing data. Check the link.</td></tr>`;
@@ -71,13 +71,14 @@
       throw e;
     }
 
-    // ---- 2. Show row count (even if 0) ----
-    const items = data.items || [];
+    // ---- 2. ALWAYS use data.items (ignore data.count) ----
+    const items = Array.isArray(data) ? data : (data.items || []);
     const count = items.length;
+
     document.getElementById('countBadge').textContent =
       count === 0 ? 'No rows' : `${count} row${count > 1 ? 's' : ''}`;
 
-    // ---- 3. Render ALL rows (no filtering) ----
+    // ---- 3. Render EVERY row in items (no filtering) ----
     const tbody = document.getElementById('tableBody');
     if (count === 0) {
       tbody.innerHTML = `<tr><td colspan="3" class="empty">No data received.</td></tr>`;
@@ -85,21 +86,21 @@
       items.forEach(row => {
         const tr = document.createElement('tr');
 
-        // Surname
+        // Surname ("1")
         const td1 = document.createElement('td');
         td1.textContent = row['1'] || '';
         td1.dataset.label = 'Surname:';
         td1.onclick = () => copy(td1.textContent, td1);
         tr.appendChild(td1);
 
-        // DOB
+        // DOB ("3")
         const td2 = document.createElement('td');
         td2.textContent = row['3'] || '';
         td2.dataset.label = 'DOB:';
         td2.onclick = () => copy(td2.textContent, td2);
         tr.appendChild(td2);
 
-        // WWCC
+        // WWCC ("7")
         const td3 = document.createElement('td');
         td3.textContent = row['7'] || '';
         td3.dataset.label = 'WWCC:';
